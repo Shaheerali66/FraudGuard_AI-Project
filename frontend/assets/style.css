@@ -1,0 +1,872 @@
+/* ============================================================
+   FraudGuard Enterprise — Premium Banking Dashboard Styles
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
+
+/* ─── Design Tokens ────────────────────────────────────────── */
+:root {
+    --primary-bg:    #0f172a;
+    --surface:       #1e293b;
+    --surface-2:     #273449;
+    --border:        rgba(148, 163, 184, 0.12);
+    --text-main:     #f1f5f9;
+    --text-sub:      #94a3b8;
+    --text-muted:    #64748b;
+    --accent-blue:   #38bdf8;
+    --accent-green:  #34d399;
+    --accent-amber:  #fbbf24;
+    --accent-red:    #f87171;
+    --accent-purple: #a78bfa;
+    --glow-blue:     rgba(56, 189, 248, 0.15);
+    --glow-green:    rgba(52, 211, 153, 0.15);
+    --glow-red:      rgba(248, 113, 113, 0.15);
+    --glow-amber:    rgba(251, 191, 36, 0.15);
+    --radius:        14px;
+    --radius-sm:     8px;
+    --shadow:        0 4px 24px rgba(0,0,0,0.35);
+    --shadow-sm:     0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* ─── Global Reset ─────────────────────────────────────────── */
+* { box-sizing: border-box; }
+
+html, body, [data-testid="stAppViewContainer"], .stApp {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    background-color: var(--primary-bg) !important;
+    color: var(--text-main) !important;
+}
+
+/* ─── Hide Streamlit chrome (specific targets, NOT the header wrapper) ────── */
+#MainMenu { visibility: hidden !important; }
+footer    { visibility: hidden !important; }
+header    { background-color: transparent !important; }
+header [data-testid="stHeaderActionElements"],
+header [data-testid="stActionButton"],
+header [data-testid="stConnectionStatus"] {
+    display: none !important;
+}
+
+/* Force both collapsedControl and stSidebarCollapsedControl to be visible and clickable */
+[data-testid="stSidebarCollapsedControl"],
+[data-testid="collapsedControl"] {
+    visibility: visible !important;
+    display: flex !important;
+    opacity: 1 !important;
+    z-index: 999999 !important;
+    position: fixed !important;
+    top: 14px !important;
+    left: 14px !important;
+    width: 38px !important;
+    height: 38px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: var(--surface-2) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-sm) !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+/* Style the toggle icon inside the collapsed sidebar buttons */
+[data-testid="stSidebarCollapsedControl"] svg,
+[data-testid="collapsedControl"] svg {
+    fill: var(--text-main) !important;
+    color: var(--text-main) !important;
+    width: 20px !important;
+    height: 20px !important;
+}
+[data-testid="stSidebarCollapsedControl"]:hover,
+[data-testid="collapsedControl"]:hover {
+    background: var(--surface) !important;
+    border-color: var(--accent-blue) !important;
+}
+[data-testid="stSidebarCollapsedControl"]:hover svg,
+[data-testid="collapsedControl"]:hover svg {
+    fill: var(--accent-blue) !important;
+    color: var(--accent-blue) !important;
+}
+
+/* ─── Main content area ────────────────────────────────────── */
+[data-testid="stAppViewContainer"] > .main {
+    background-color: var(--primary-bg) !important;
+}
+.block-container {
+    padding: 2rem 2.5rem !important;
+    max-width: 1200px !important;
+}
+
+/* ─── Sidebar ──────────────────────────────────────────────── */
+section[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, #0c1427 0%, #131f35 100%) !important;
+    border-right: 1px solid var(--border) !important;
+    padding-top: 1rem !important;
+}
+section[data-testid="stSidebar"] * {
+    color: var(--text-main) !important;
+}
+section[data-testid="stSidebar"] h1,
+section[data-testid="stSidebar"] h2,
+section[data-testid="stSidebar"] h3 {
+    color: var(--text-main) !important;
+    font-weight: 700 !important;
+}
+section[data-testid="stSidebar"] .stTitle {
+    color: var(--accent-blue) !important;
+    font-size: 1.3rem !important;
+    font-weight: 800 !important;
+}
+/* Sidebar divider */
+section[data-testid="stSidebar"] hr {
+    border-color: var(--border) !important;
+    margin: 0.75rem 0 !important;
+}
+/* Sidebar subheader label */
+section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
+    color: var(--text-sub) !important;
+    font-size: 0.75rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+    font-weight: 600 !important;
+}
+
+/* ─── Sidebar Buttons ──────────────────────────────────────── */
+section[data-testid="stSidebar"] .stButton > button {
+    background: var(--surface) !important;
+    color: var(--text-main) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-sm) !important;
+    font-weight: 500 !important;
+    font-size: 0.9rem !important;
+    padding: 0.6rem 1rem !important;
+    transition: all 0.2s ease !important;
+    text-align: left !important;
+    width: 100% !important;
+}
+/* Sidebar button text — target every child Streamlit injects */
+section[data-testid="stSidebar"] .stButton > button *,
+section[data-testid="stSidebar"] .stButton > button p,
+section[data-testid="stSidebar"] .stButton > button span {
+    color: var(--text-main) !important;
+    opacity: 1 !important;
+}
+section[data-testid="stSidebar"] .stButton > button:hover {
+    background: var(--surface-2) !important;
+    border-color: var(--accent-blue) !important;
+    color: var(--accent-blue) !important;
+    transform: translateX(3px) !important;
+    box-shadow: var(--shadow-sm) !important;
+}
+section[data-testid="stSidebar"] .stButton > button:hover *,
+section[data-testid="stSidebar"] .stButton > button:hover p,
+section[data-testid="stSidebar"] .stButton > button:hover span {
+    color: var(--accent-blue) !important;
+    opacity: 1 !important;
+}
+
+/* ─── Headings ─────────────────────────────────────────────── */
+h1, h2, h3, h4 {
+    color: var(--text-main) !important;
+    font-family: 'Inter', sans-serif !important;
+}
+h1 { font-size: 1.9rem !important; font-weight: 800 !important; letter-spacing: -0.02em !important; }
+h3 { font-size: 1rem !important; font-weight: 600 !important; color: var(--text-sub) !important; }
+
+/* ─── Form labels (FIX for invisible labels) ───────────────── */
+label,
+.stSelectbox label,
+.stNumberInput label,
+.stTextInput label,
+.stCheckbox label,
+[data-testid="stWidgetLabel"],
+[data-testid="stWidgetLabel"] p,
+.stSelectbox [data-testid="stWidgetLabel"] p,
+.stNumberInput [data-testid="stWidgetLabel"] p,
+.stCheckbox [data-testid="stWidgetLabel"] p {
+    color: var(--text-sub) !important;
+    font-size: 0.85rem !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.01em !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* ─── Form Inputs ──────────────────────────────────────────── */
+.stSelectbox > div > div,
+.stNumberInput > div > div > input,
+.stTextInput > div > div > input {
+    background-color: var(--surface) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-sm) !important;
+    color: var(--text-main) !important;
+    font-family: 'Inter', sans-serif !important;
+}
+.stSelectbox > div > div:hover,
+.stNumberInput > div > div > input:focus,
+.stTextInput > div > div > input:focus {
+    border-color: var(--accent-blue) !important;
+    box-shadow: 0 0 0 3px var(--glow-blue) !important;
+}
+/* Dropdown arrow & options */
+.stSelectbox svg { fill: var(--text-sub) !important; }
+
+/* ─── Checkbox ─────────────────────────────────────────────── */
+.stCheckbox {
+    background: var(--surface) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-sm) !important;
+    padding: 0.6rem 1rem !important;
+}
+.stCheckbox > label {
+    color: var(--text-main) !important;
+    font-size: 0.9rem !important;
+}
+.stCheckbox input[type="checkbox"] {
+    accent-color: var(--accent-blue) !important;
+    width: 16px !important;
+    height: 16px !important;
+}
+
+/* ─── Primary Button ───────────────────────────────────────── */
+.stButton > button[kind="primary"],
+.stFormSubmitButton > button[kind="primaryFormSubmit"],
+.stFormSubmitButton > button {
+    background: linear-gradient(135deg, #0ea5e9, #38bdf8) !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: var(--radius-sm) !important;
+    font-weight: 700 !important;
+    font-size: 0.95rem !important;
+    padding: 0.65rem 1.5rem !important;
+    letter-spacing: 0.01em !important;
+    box-shadow: 0 4px 15px rgba(14, 165, 233, 0.35) !important;
+    transition: all 0.2s ease !important;
+}
+/* Force white text on ALL child elements inside primary buttons */
+.stButton > button[kind="primary"] *,
+.stButton > button[kind="primary"] p,
+.stButton > button[kind="primary"] span,
+.stFormSubmitButton > button *,
+.stFormSubmitButton > button p,
+.stFormSubmitButton > button span {
+    color: #ffffff !important;
+    opacity: 1 !important;
+}
+.stButton > button[kind="primary"]:hover,
+.stFormSubmitButton > button:hover {
+    background: linear-gradient(135deg, #0284c7, #0ea5e9) !important;
+    color: #ffffff !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 20px rgba(14, 165, 233, 0.5) !important;
+}
+.stButton > button[kind="primary"]:hover *,
+.stButton > button[kind="primary"]:hover p,
+.stButton > button[kind="primary"]:hover span,
+.stFormSubmitButton > button:hover *,
+.stFormSubmitButton > button:hover p,
+.stFormSubmitButton > button:hover span {
+    color: #ffffff !important;
+    opacity: 1 !important;
+}
+
+/* ─── Secondary / Default Buttons ──────────────────────────── */
+.stButton > button:not([kind="primary"]),
+.stButton > button[kind="secondary"] {
+    background: var(--surface-2) !important;
+    color: var(--text-main) !important;
+    border: 1px solid rgba(148,163,184,0.25) !important;
+    border-radius: var(--radius-sm) !important;
+    font-weight: 600 !important;
+    transition: all 0.2s ease !important;
+}
+/* Force visible text on ALL child elements inside secondary buttons */
+.stButton > button:not([kind="primary"]) *,
+.stButton > button:not([kind="primary"]) p,
+.stButton > button:not([kind="primary"]) span,
+.stButton > button[kind="secondary"] *,
+.stButton > button[kind="secondary"] p,
+.stButton > button[kind="secondary"] span {
+    color: var(--text-main) !important;
+    opacity: 1 !important;
+}
+.stButton > button:not([kind="primary"]):hover,
+.stButton > button[kind="secondary"]:hover {
+    background: #273449 !important;
+    border-color: rgba(56,189,248,0.4) !important;
+    color: #f1f5f9 !important;
+}
+.stButton > button:not([kind="primary"]):hover *,
+.stButton > button:not([kind="primary"]):hover p,
+.stButton > button:not([kind="primary"]):hover span,
+.stButton > button[kind="secondary"]:hover *,
+.stButton > button[kind="secondary"]:hover p,
+.stButton > button[kind="secondary"]:hover span {
+    color: #f1f5f9 !important;
+    opacity: 1 !important;
+}
+
+/* ─── KPI / Custom Cards ───────────────────────────────────── */
+.custom-card {
+    background: var(--surface) !important;
+    padding: 1.5rem !important;
+    border-radius: var(--radius) !important;
+    box-shadow: var(--shadow-sm) !important;
+    border: 1px solid var(--border) !important;
+    margin-bottom: 1.25rem !important;
+    color: var(--text-main) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+.custom-card:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: var(--shadow) !important;
+}
+.custom-card h3 {
+    margin-top: 0 !important;
+    color: var(--text-sub) !important;
+    font-weight: 600 !important;
+    font-size: 0.8rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.06em !important;
+}
+.custom-card h4 {
+    margin: 0 !important;
+    color: var(--text-main) !important;
+    font-weight: 700 !important;
+}
+.metric-value {
+    font-size: 2.2rem !important;
+    font-weight: 800 !important;
+    margin: 0.5rem 0 !important;
+    letter-spacing: -0.03em !important;
+    color: var(--accent-blue) !important;
+}
+
+/* ─── Streamlit native metrics ─────────────────────────────── */
+[data-testid="metric-container"] {
+    background: var(--surface) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius) !important;
+    padding: 1rem 1.25rem !important;
+}
+[data-testid="stMetricValue"] {
+    color: var(--accent-blue) !important;
+    font-weight: 800 !important;
+}
+[data-testid="stMetricLabel"] {
+    color: var(--text-sub) !important;
+    font-size: 0.8rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+}
+
+/* ─── Alerts & Banners ─────────────────────────────────────── */
+.alert-green {
+    border-left: 4px solid var(--accent-green) !important;
+    background: var(--glow-green) !important;
+}
+.alert-amber {
+    border-left: 4px solid var(--accent-amber) !important;
+    background: var(--glow-amber) !important;
+}
+.alert-red {
+    border-left: 4px solid var(--accent-red) !important;
+    background: var(--glow-red) !important;
+}
+
+/* Override Streamlit success/warning/error boxes */
+[data-testid="stAlert"] {
+    border-radius: var(--radius-sm) !important;
+    font-weight: 500 !important;
+}
+
+/* ─── Data Table ───────────────────────────────────────────── */
+.stDataFrame {
+    border-radius: var(--radius) !important;
+    overflow: hidden !important;
+    border: 1px solid var(--border) !important;
+}
+[data-testid="stTable"] table {
+    background: var(--surface) !important;
+    border-radius: var(--radius) !important;
+    color: var(--text-main) !important;
+}
+[data-testid="stTable"] th {
+    background: var(--surface-2) !important;
+    color: var(--text-sub) !important;
+    font-size: 0.75rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    padding: 0.75rem 1rem !important;
+}
+[data-testid="stTable"] td {
+    color: var(--text-main) !important;
+    border-color: var(--border) !important;
+    padding: 0.65rem 1rem !important;
+}
+
+/* ─── Spinner ──────────────────────────────────────────────── */
+.stSpinner > div {
+    border-top-color: var(--accent-blue) !important;
+}
+
+/* ─── Scrollbar ────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--primary-bg); }
+::-webkit-scrollbar-thumb { background: var(--surface-2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ─── Subheader text ───────────────────────────────────────── */
+[data-testid="stMarkdownContainer"] p {
+    color: var(--text-sub) !important;
+    font-size: 0.95rem !important;
+}
+.stSubheader {
+    color: var(--text-sub) !important;
+    font-size: 0.75rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+    font-weight: 700 !important;
+}
+
+/* ─── Info box ─────────────────────────────────────────────── */
+[data-testid="stInfo"] {
+    background: var(--glow-blue) !important;
+    border-color: var(--accent-blue) !important;
+    color: var(--text-main) !important;
+}
+
+/* ─── Material Symbols Customization & Sidebar Alignment ─── */
+.material-symbols-outlined {
+    font-family: 'Material Symbols Outlined' !important;
+    font-weight: 300 !important; /* Nice thin outlined appearance */
+    font-size: 20px;
+    vertical-align: middle;
+    display: inline-block;
+    color: currentColor;
+}
+
+[data-testid="stIconMaterial"] {
+    color: currentColor !important;
+}
+
+/* Page title icons size override */
+h1 [data-testid="stIconMaterial"], 
+h1 .material-symbols-outlined {
+    font-size: 24px !important;
+}
+
+/* Status-specific icon colors */
+.material-symbols-outlined[color*="green"] {
+    color: #10b981 !important;
+}
+
+/* Sidebar navigation buttons layout & alignment fix */
+[data-testid="stSidebar"] button div {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    justify-content: flex-start !important;
+    text-align: left !important;
+    width: 100% !important;
+}
+
+/* Force left alignment of the sidebar nav label text */
+/* Force sidebar button inner text and icon spans to use correct color */
+[data-testid="stSidebar"] button div span,
+[data-testid="stSidebar"] button p {
+    text-align: left !important;
+    color: inherit !important;
+    opacity: 1 !important;
+}
+
+/* Sidebar labels left-aligned with matching padding */
+section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
+    text-align: left !important;
+    padding-left: 0.75rem !important;
+}
+
+/* Sidebar Footer — normal flow, no absolute positioning that causes overlap */
+.sidebar-footer {
+    margin-top: 1.5rem !important;
+    padding-top: 0.75rem !important;
+    border-top: 1px solid rgba(148,163,184,0.1) !important;
+    text-align: left !important;
+    padding-left: 0.5rem !important;
+    font-size: 0.72rem !important;
+    color: #475569 !important;
+    line-height: 1.6 !important;
+}
+
+/* ─── Recent Transactions scroll container ──────────────────── */
+.recent-tx-scroll {
+    max-height: 480px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--primary-bg);
+    padding: 0.5rem;
+}
+/* Custom scrollbar — dark theme */
+.recent-tx-scroll::-webkit-scrollbar { width: 5px; }
+.recent-tx-scroll::-webkit-scrollbar-track { background: var(--surface-2); border-radius: 4px; }
+.recent-tx-scroll::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+.recent-tx-scroll::-webkit-scrollbar-thumb:hover { background: #64748b; }
+/* Firefox */
+.recent-tx-scroll { scrollbar-width: thin; scrollbar-color: #475569 #1e293b; }
+
+/* ─── Dashboard Quick Fraud Check card ──────────────────────── */
+.quick-check-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 1.5rem;
+    border-left: 3px solid var(--accent-blue);
+}
+
+/* ─── GLOBAL CATCH-ALL: Force button text visible on every Streamlit button ─ */
+/* Streamlit wraps button labels in <p> tags and sometimes <span> with its own */
+/* inherited dark color. These rules override that at the highest specificity.  */
+
+/* Any button in the main area: ensure the p and span inside are readable */
+[data-testid="stAppViewContainer"] button p,
+[data-testid="stAppViewContainer"] button span:not([data-testid="stIconMaterial"]) {
+    opacity: 1 !important;
+}
+/* Secondary/default buttons globally */
+.stButton button:not([kind="primary"]) p,
+.stButton button:not([kind="primary"]) > div,
+.stButton button:not([kind="primary"]) > div > span {
+    color: #f1f5f9 !important;
+    opacity: 1 !important;
+}
+/* Primary buttons globally */
+.stButton button[kind="primary"] p,
+.stButton button[kind="primary"] > div,
+.stButton button[kind="primary"] > div > span,
+.stFormSubmitButton button p,
+.stFormSubmitButton button > div,
+.stFormSubmitButton button > div > span {
+    color: #ffffff !important;
+    opacity: 1 !important;
+}
+/* Download button text */
+.stDownloadButton button,
+.stDownloadButton button p,
+.stDownloadButton button span:not([data-testid="stIconMaterial"]) {
+    color: #f1f5f9 !important;
+    opacity: 1 !important;
+}
+
+/* ─── Home: top navigation bar ─────────────────────────────── */
+.home-navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.1rem 3rem;
+    background: rgba(15,23,42,0.98);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+}
+.home-navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+.home-navbar-wordmark {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--text-main);
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+}
+.home-navbar-badge {
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: var(--accent-blue);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+}
+.home-navbar-links {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+/* ─── Home: hero section ────────────────────────────────────── */
+.hero-section {
+    background: linear-gradient(160deg, #080e1c 0%, #0f172a 45%, #0a1525 100%);
+    padding: 4rem 2rem 3.5rem;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+}
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: -120px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 700px;
+    height: 500px;
+    background: radial-gradient(ellipse, rgba(56,189,248,0.07) 0%, transparent 65%);
+    pointer-events: none;
+}
+.hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(56,189,248,0.08);
+    border: 1px solid rgba(56,189,248,0.2);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--accent-blue);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 1.5rem;
+}
+.hero-headline {
+    font-size: 2.8rem;
+    font-weight: 800;
+    color: var(--text-main);
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    margin: 0 auto 1rem;
+    max-width: 760px;
+}
+.hero-gradient-text {
+    background: linear-gradient(135deg, #38bdf8, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.hero-subtext {
+    font-size: 1rem;
+    color: var(--text-sub);
+    max-width: 540px;
+    margin: 0 auto 2.5rem;
+    line-height: 1.7;
+}
+
+/* ─── Home: checkout hero card ──────────────────────────────── */
+.checkout-hero-card {
+    background: var(--surface);
+    border: 1px solid rgba(56,189,248,0.15);
+    border-radius: 20px;
+    padding: 1.75rem 2rem;
+    max-width: 720px;
+    margin: 0 auto;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(56,189,248,0.06);
+    text-align: left;
+}
+.checkout-hero-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent-blue);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* ─── Home: How It Works section ────────────────────────────── */
+.step-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.75rem 1.25rem;
+    text-align: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    height: 100%;
+}
+.step-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow);
+}
+.step-number {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(56,189,248,0.1);
+    border: 1px solid rgba(56,189,248,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: var(--accent-blue);
+    margin: 0 auto 0.9rem;
+}
+
+/* ─── Home: stat/trust strip ────────────────────────────────── */
+.stats-section {
+    background: linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 3rem 2rem;
+}
+.stat-number {
+    font-size: 2.4rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    background: linear-gradient(135deg, #38bdf8, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.25rem;
+    text-align: center;
+}
+.stat-label {
+    font-size: 0.85rem;
+    color: var(--text-sub);
+    font-weight: 600;
+    text-align: center;
+}
+.stat-sublabel {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-top: 0.15rem;
+    text-align: center;
+}
+
+/* ─── Login card ────────────────────────────────────────────── */
+.login-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2.5rem;
+    max-width: 420px;
+    width: 100%;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+    margin: 3rem auto;
+}
+
+/* ─── Authenticated portal: top header bar ──────────────────── */
+.portal-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.8rem 1.25rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 1.5rem;
+}
+.portal-topbar-brand {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.portal-user-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 0.78rem;
+    color: var(--text-sub);
+}
+
+/* ─── Sidebar: user info block ──────────────────────────────── */
+.sidebar-user-info {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.7rem 1rem;
+    margin: 0.75rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+.sidebar-user-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0ea5e9, #a78bfa);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+}
+
+/* ─── Active sidebar nav button override ────────────────────── */
+.sidebar-nav-active > div > button {
+    background: rgba(56,189,248,0.08) !important;
+    border-left: 3px solid var(--accent-blue) !important;
+    color: var(--accent-blue) !important;
+}
+
+/* ─── Dashboard KPI cards (enhanced) ───────────────────────── */
+.metric-kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.4rem 1.5rem;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.metric-kpi-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow);
+}
+.metric-kpi-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.metric-kpi-icon .material-symbols-outlined { font-size: 1.15rem; }
+.metric-kpi-value {
+    font-size: 2.2rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    color: var(--text-main);
+    line-height: 1;
+    margin: 0.5rem 0 0.25rem;
+}
+.metric-kpi-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+}
+.metric-kpi-trend {
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    margin-top: 0.3rem;
+}
+
+/* ─── Status pills ──────────────────────────────────────────── */
+.status-pill {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.pill-approved { background: rgba(52,211,153,0.12);  color: #34d399; }
+.pill-pending  { background: rgba(251,191,36,0.12);  color: #fbbf24; }
+.pill-flagged  { background: rgba(248,113,113,0.12); color: #f87171; }
+.pill-blocked  { background: rgba(248,113,113,0.18); color: #f87171; border: 1px solid rgba(248,113,113,0.3); }

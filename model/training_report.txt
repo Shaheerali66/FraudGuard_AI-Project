@@ -1,0 +1,32 @@
+=== FRAUD DETECTION MODEL TRAINING REPORT ===
+
+Date: 2026-07-14 01:04:42
+Training dataset: D:\Fraud_Detection_System\data\credit_card_transactions.csv (Downsampled to 14512 rows)
+
+Candidate Comparison Table:
+Metric       | Random Forest   | XGBoost        
+--------------------------------------------------
+Accuracy     | 0.9087            | 0.9845
+Precision    | 0.2538            | 0.7615
+Recall       | 0.8235            | 0.8137
+F1           | 0.3880            | 0.7867
+Roc_auc      | 0.9403            | 0.9872
+
+==================================================
+Chosen Model: XGBoost
+==================================================
+
+Confusion Matrix:
+[[2775   26]
+ [  19   83]]
+
+Classification Report:
+              precision    recall  f1-score   support
+
+           0       0.99      0.99      0.99      2801
+           1       0.76      0.81      0.79       102
+
+    accuracy                           0.98      2903
+   macro avg       0.88      0.90      0.89      2903
+weighted avg       0.99      0.98      0.98      2903
+
