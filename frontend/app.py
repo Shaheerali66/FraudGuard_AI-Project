@@ -20,7 +20,7 @@ def load_css():
             st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 load_css()
 
-API_BASE = "http://127.0.0.1:8000/api/v1"
+API_BASE = os.environ.get("API_BASE", "http://127.0.0.1:8000/api/v1")
 
 # Demo API key — seeded into the database by backend/database.py on first run.
 INTERNAL_API_KEY = "fg-demo-key-a1b2c3d4e5f6"

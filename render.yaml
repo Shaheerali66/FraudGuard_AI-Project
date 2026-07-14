@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: fraudguard-backend
+    env: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+
+  - type: web
+    name: fraudguard-frontend
+    env: python
+    rootDir: frontend
+    buildCommand: pip install -r requirements.txt
+    # IMPORTANT: After the backend service deploys, go to Render dashboard → fraudguard-frontend → Environment,
+    # and update API_BASE to the backend's actual live URL + "/api/v1" (e.g. https://fraudguard-backend-xxxx.onrender.com/api/v1),
+    # then manually redeploy the frontend service.
+    startCommand: streamlit run app.py --server.port $PORT --server.address 0.0.0.0 --server.headless true --server.enableCORS false --server.enableXsrfProtection false
+    envVars:
+      - key: API_BASE
+        value: http://127.0.0.1:8000/api/v1
