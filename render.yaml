@@ -8,6 +8,8 @@ services:
     envVars:
       - key: ENVIRONMENT
         value: production
+      - key: PYTHON_VERSION
+        value: 3.11.9
 
   - type: web
     name: fraudguard-frontend
