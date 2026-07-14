@@ -5,6 +5,7 @@ import time
 import os
 import random
 from datetime import datetime
+import plotly.express as px
 
 st.set_page_config(
     page_title="FraudGuard Enterprise",
@@ -655,12 +656,34 @@ def render_dashboard():
                 })
                 status_df = status_df[status_df["Count"] > 0]
                 if not status_df.empty:
-                    st.bar_chart(
-                        status_df.set_index("Status"),
-                        color="#38bdf8",
-                        use_container_width=True,
-                        height=250
-                    )
+                    try:
+                        color_map = {
+                            "Approved": "#10b981",  # green
+                            "Pending": "#f59e0b",   # amber
+                            "Flagged": "#ef4444",   # red
+                            "Blocked": "#ef4444"    # red
+                        }
+                        fig = px.bar(
+                            status_df,
+                            x="Status",
+                            y="Count",
+                            color="Status",
+                            color_discrete_map=color_map,
+                            labels={"Count": "Transactions", "Status": "Status"}
+                        )
+                        fig.update_layout(
+                            paper_bgcolor="rgba(0,0,0,0)",
+                            plot_bgcolor="rgba(0,0,0,0)",
+                            font_color="#f1f5f9",
+                            showlegend=False,
+                            height=250,
+                            margin=dict(l=20, r=20, t=10, b=20),
+                            xaxis=dict(showgrid=False, linecolor="rgba(148,163,184,0.12)"),
+                            yaxis=dict(showgrid=True, gridcolor="rgba(148,163,184,0.06)", linecolor="rgba(148,163,184,0.12)")
+                        )
+                        st.plotly_chart(fig, use_container_width=True, key="status_plotly_chart")
+                    except Exception as e:
+                        st.warning("Chart temporarily unavailable", icon=":material/warning:")
                 else:
                     st.info("No data to display yet.", icon=":material/info:")
 
