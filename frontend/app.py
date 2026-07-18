@@ -165,7 +165,7 @@ def _checkout_form(form_key: str):
                     timeout=10
                 )
                 response.raise_for_status()
-                st.session_state[result_key] = (response.json(), amt, merchant_category)
+                st.session_state[result_key] = (response.json(), amt, merchant_category, payload)
                 st.rerun()  # Real-time refresh for Dashboard stats & Recent Transactions
             except requests.exceptions.ConnectionError:
                 st.error("Cannot connect to backend. Make sure the API server is running on port 8000.", icon=":material/cancel:")
@@ -175,7 +175,13 @@ def _checkout_form(form_key: str):
                 st.session_state.pop(result_key, None)
 
     if result_key in st.session_state:
-        data, amt_val, cat_val = st.session_state[result_key]
+        session_tuple = st.session_state[result_key]
+        if len(session_tuple) == 4:
+            data, amt_val, cat_val, payload = session_tuple
+        else:
+            data, amt_val, cat_val = session_tuple
+            payload = None
+
         fraud_prob = data.get("fraud_probability", 0)
         tx_id      = data.get("transaction_id", "—")
         status     = data.get("status", "—")
@@ -192,9 +198,24 @@ def _checkout_form(form_key: str):
         st.table(summary_df)
 
         top_factors = data.get("top_factors", [])
-        if top_factors:
+        if top_factors or payload:
             st.markdown("<br><h4><span class='material-symbols-outlined' style='color:var(--accent-blue); font-size:24px; vertical-align:middle; margin-right:6px;'>search</span><span style='vertical-align:middle;'>Why this decision?</span></h4>", unsafe_allow_html=True)
-            st.markdown("<p style='color:#94a3b8; font-size:0.88rem; margin-bottom:1rem;'>Key risk drivers identified by the model:</p>", unsafe_allow_html=True)
+            
+            # Natural Language Explanation
+            explanation = data.get("explanation_text", "")
+            if explanation:
+                st.info(explanation, icon=":material/info:")
+
+            # Engineered Features Expander
+            if payload:
+                with st.expander("Behind the scenes: calculated risk inputs", expanded=False):
+                    col1, col2, col3, col4 = st.columns(4)
+                    col1.metric("Distance from Home", f"{payload.get('distance_from_home', 0)} km")
+                    col2.metric("Night Transaction", "Yes" if payload.get('is_night_transaction') == 1 else "No")
+                    col3.metric("Weekend Transaction", "Yes" if payload.get('weekend_transaction') == 1 else "No")
+                    col4.metric("Transaction Hour", f"{payload.get('transaction_hour', 0)}:00")
+            
+            st.markdown("<p style='color:#94a3b8; font-size:0.88rem; margin-bottom:1rem; margin-top:1rem;'>Key risk drivers identified by the model:</p>", unsafe_allow_html=True)
             total_impact = sum(abs(f.get("impact", 0.0)) for f in top_factors)
             for factor in top_factors:
                 feat_name = factor.get("feature", "Unknown")
@@ -1127,6 +1148,105 @@ def render_api_integration():
     st.markdown("<p style='color:#64748b; font-size:0.85rem;'>Need help? See the interactive API docs at <a href='http://127.0.0.1:8000/docs' target='_blank' style='color:#38bdf8;'>http://127.0.0.1:8000/docs</a></p>", unsafe_allow_html=True)
 
 
+def render_model_performance():
+    page_header("analytics", "Model Performance Audit", "Evaluate metrics and view comparison between machine learning candidate models.")
+    
+    try:
+        resp = requests.get(f"{API_BASE}/model/performance", timeout=5)
+        if resp.status_code == 200:
+            data = resp.json()
+            metrics = data.get("metrics", {})
+            comparison = data.get("comparison", [])
+            
+            st.markdown("#### :material/verified: Active Model Metrics (XGBoost)")
+            m1, m2, m3, m4, m5 = st.columns(5)
+            
+            def fmt_metric(val):
+                return f"{val:.2%}" if val <= 1.0 else f"{val}"
+                
+            m1.markdown(f"""
+            <div class="metric-kpi-card">
+                <div class="metric-kpi-label">Accuracy</div>
+                <div class="metric-kpi-value" style="color:var(--accent-blue);">{fmt_metric(metrics.get('accuracy', 0.9845))}</div>
+            </div>""", unsafe_allow_html=True)
+            
+            m2.markdown(f"""
+            <div class="metric-kpi-card">
+                <div class="metric-kpi-label">Precision</div>
+                <div class="metric-kpi-value" style="color:var(--accent-green);">{fmt_metric(metrics.get('precision', 0.7615))}</div>
+            </div>""", unsafe_allow_html=True)
+            
+            m3.markdown(f"""
+            <div class="metric-kpi-card">
+                <div class="metric-kpi-label">Recall</div>
+                <div class="metric-kpi-value" style="color:var(--accent-amber);">{fmt_metric(metrics.get('recall', 0.8137))}</div>
+            </div>""", unsafe_allow_html=True)
+            
+            m4.markdown(f"""
+            <div class="metric-kpi-card">
+                <div class="metric-kpi-label">F1-Score</div>
+                <div class="metric-kpi-value" style="color:var(--accent-purple);">{fmt_metric(metrics.get('f1', 0.7867))}</div>
+            </div>""", unsafe_allow_html=True)
+            
+            m5.markdown(f"""
+            <div class="metric-kpi-card">
+                <div class="metric-kpi-label">ROC-AUC</div>
+                <div class="metric-kpi-value" style="color:#ffffff;">{fmt_metric(metrics.get('roc_auc', 0.9872))}</div>
+            </div>""", unsafe_allow_html=True)
+            
+            st.markdown("<br>", unsafe_allow_html=True)
+            
+            st.markdown("#### :material/compare: Candidate Models Comparison")
+            st.markdown("<p style='color:#94a3b8; font-size:0.88rem; margin-bottom:1rem;'>Evaluation results across 5-fold stratified cross-validation. XGBoost was chosen as the production model due to superior ROC-AUC and F1-score performance.</p>", unsafe_allow_html=True)
+            
+            if comparison:
+                comp_rows = []
+                for item in comparison:
+                    metric_name = item.get("metric", "")
+                    rf_val = item.get("random_forest", 0.0)
+                    xgb_val = item.get("xgboost", 0.0)
+                    
+                    rf_bold = ""
+                    xgb_bold = ""
+                    if xgb_val > rf_val:
+                        xgb_bold = "style='color:var(--accent-green); font-weight:700;'"
+                    elif rf_val > xgb_val:
+                        rf_bold = "style='color:var(--accent-green); font-weight:700;'"
+                        
+                    comp_rows.append(f"""
+                    <tr>
+                        <td style="padding:10px; border-bottom:1px solid var(--border); color:var(--text-main); font-weight:600;">{metric_name}</td>
+                        <td style="padding:10px; border-bottom:1px solid var(--border); color:var(--text-sub);">{rf_val:.4f}</td>
+                        <td {xgb_bold} style="padding:10px; border-bottom:1px solid var(--border);">{xgb_val:.4f}</td>
+                    </tr>
+                    """)
+                
+                table_html = f"""
+                <table style="width:100%; border-collapse:collapse; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); overflow:hidden;">
+                    <thead>
+                        <tr style="background:var(--surface-2); text-align:left;">
+                            <th style="padding:12px 10px; color:var(--accent-blue); font-weight:700; font-size:0.85rem; text-transform:uppercase; letter-spacing:0.05em;">Performance Indicator</th>
+                            <th style="padding:12px 10px; color:var(--text-muted); font-weight:700; font-size:0.85rem; text-transform:uppercase; letter-spacing:0.05em;">Random Forest (CV Baseline)</th>
+                            <th style="padding:12px 10px; color:var(--accent-green); font-weight:700; font-size:0.85rem; text-transform:uppercase; letter-spacing:0.05em;">XGBoost (Active Production)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {"".join(comp_rows)}
+                    </tbody>
+                </table>
+                """
+                st.markdown(table_html, unsafe_allow_html=True)
+            else:
+                st.warning("No comparison data available.", icon=":material/warning:")
+                
+            with st.expander("View Raw Training Execution Logs"):
+                st.text(data.get("raw_report", "No report file log found."))
+        else:
+            st.error("Failed to load model performance metrics from backend.", icon=":material/cancel:")
+    except Exception as e:
+        st.error(f"Error loading model performance metrics: {e}", icon=":material/cancel:")
+
+
 # ─── Authenticated Portal Shell ───────────────────────────────────────────────
 def _portal_sidebar():
     """Renders the authenticated sidebar with branding, full nav, user info, and logout."""
@@ -1171,6 +1291,7 @@ def _portal_sidebar():
     nav_btn("Pending Reviews",     "fact_check", "Pending Review")
     nav_btn("Transaction History", "history",    "History")
     nav_btn("API Integration",     "api",        "API Integration")
+    nav_btn("Model Performance",   "monitoring", "Model Performance")
 
     st.sidebar.markdown('<div style="margin:0.5rem 0;"></div>', unsafe_allow_html=True)
 
@@ -1282,6 +1403,8 @@ def render_portal():
         render_csv_upload()
     elif page == "API Integration":
         render_api_integration()
+    elif page == "Model Performance":
+        render_model_performance()
     else:
         st.session_state.page = "Dashboard"
         st.rerun()

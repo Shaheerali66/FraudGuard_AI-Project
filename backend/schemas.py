@@ -29,6 +29,7 @@ class PredictionResponse(BaseModel):
     verdict: str
     risk_tier: str
     status: str
+    explanation_text: str
     top_factors: List[ExplanationFactor] = []
 
 

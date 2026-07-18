@@ -1,0 +1,15 @@
+fastapi==0.115.0
+uvicorn==0.32.0
+pydantic==2.13.4
+pydantic-settings==2.6.0
+pandas>=2.1.0,<2.3.0
+numpy>=1.26.4,<2.1
+scikit-learn>=1.4.0,<1.6.0
+joblib==1.5.3
+SQLAlchemy==2.0.36
+xgboost
+shap
+python-multipart==0.0.9
+streamlit==1.41.0
+requests==2.32.3
+plotly==5.24.1

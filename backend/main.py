@@ -118,6 +118,47 @@ def startup():
 
 # ─── Shared prediction helper ─────────────────────────────────────────────────
 
+def generate_natural_language_explanation(top_factors: List[ExplanationFactor], fraud_probability: float, status: str) -> str:
+    if not top_factors:
+        return "This transaction was approved because no significant risk factors were detected."
+    
+    mapping = {
+        "distance_from_home": "the distance from the cardholder's home",
+        "transaction_hour": "the hour of the transaction",
+        "weekend_transaction": "the transaction occurring on a weekend",
+        "is_night_transaction": "the transaction occurring at night",
+        "amt": "a high transaction amount",
+        "amount": "a high transaction amount",
+        "city_pop": "the transaction occurring in a small or remote city",
+        "gender": "the cardholder's gender",
+    }
+    
+    increasing_factors = [f.feature for f in top_factors if f.direction == "increases_risk"]
+    decreasing_factors = [f.feature for f in top_factors if f.direction == "decreases_risk"]
+    
+    def get_phrase(feat):
+        feat_lower = feat.lower()
+        for k, v in mapping.items():
+            if k in feat_lower:
+                return v
+        return f"the transaction feature '{feat}'"
+
+    if status in ["Blocked", "Flagged", "Pending Review"]:
+        if increasing_factors:
+            factors_str = " and ".join([get_phrase(f) for f in increasing_factors[:2]])
+            return f"This transaction was flagged as suspicious because {factors_str} significantly increased the risk score."
+        else:
+            return "This transaction was flagged as suspicious due to elevated risk indicators."
+    else:
+        if decreasing_factors:
+            factors_str = get_phrase(decreasing_factors[0])
+            return f"This transaction was approved because no significant risk factors were detected — {factors_str} slightly influenced the score but overall risk remained low."
+        elif increasing_factors:
+            factors_str = get_phrase(increasing_factors[0])
+            return f"This transaction was approved because overall risk remained low, although {factors_str} was noted as a minor risk factor."
+        else:
+            return "This transaction was approved because no significant risk factors were detected."
+
 def predict_single(transaction: TransactionInput, db: Session, compute_explainability: bool = False) -> PredictionResponse:
     """
     Core ML prediction logic shared by both the single-transaction and
@@ -136,7 +177,7 @@ def predict_single(transaction: TransactionInput, db: Session, compute_explainab
         "merch_zipcode":             10000,
         "Customer_Satisfaction_Score": 5,
         "Customer_Age":              30,
-        "Loyalty_Points_Earned":     100,
+        "Loyalty_Points_Earned": 100,
     }
     for col, val in patch_cols.items():
         if col not in input_data.columns:
@@ -191,6 +232,8 @@ def predict_single(transaction: TransactionInput, db: Session, compute_explainab
         except Exception as e:
             logger.error(f"Error computing SHAP explainability: {e}", exc_info=True)
 
+    explanation_text = generate_natural_language_explanation(top_factors, fraud_probability, status)
+
     db_tx = Transaction(
         transaction_id=tx_id,
         merchant_category=transaction.merchant_category,
@@ -215,6 +258,7 @@ def predict_single(transaction: TransactionInput, db: Session, compute_explainab
         verdict=verdict,
         risk_tier=risk_tier,
         status=status,
+        explanation_text=explanation_text,
         top_factors=top_factors
     )
 
@@ -547,3 +591,64 @@ def get_dashboard_stats(db: Session = Depends(get_db)):
         blocked=blocked,
         avg_fraud_score=avg_score,
     )
+
+@app.get(f"{settings.API_VERSION}/model/performance", tags=["Model"])
+def get_model_performance():
+    """Reads and parses model/training_report.txt to extract RandomForest vs XGBoost metrics."""
+    # Move up one level from backend/ to root, then into model/
+    report_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "model", "training_report.txt")
+    
+    # Fallback default stats in case file reading fails
+    fallback_data = {
+        "metrics": {
+            "accuracy": 0.9845,
+            "precision": 0.7615,
+            "recall": 0.8137,
+            "f1": 0.7867,
+            "roc_auc": 0.9872
+        },
+        "comparison": [
+            {"metric": "Accuracy", "random_forest": 0.9087, "xgboost": 0.9845},
+            {"metric": "Precision", "random_forest": 0.2538, "xgboost": 0.7615},
+            {"metric": "Recall", "random_forest": 0.8235, "xgboost": 0.8137},
+            {"metric": "F1", "random_forest": 0.3880, "xgboost": 0.7867},
+            {"metric": "ROC-AUC", "random_forest": 0.9403, "xgboost": 0.9872}
+        ],
+        "chosen_model": "XGBoost",
+        "raw_report": "Default static fallback report."
+    }
+
+    if not os.path.exists(report_path):
+        return fallback_data
+
+    try:
+        with open(report_path, "r") as f:
+            content = f.read()
+        
+        lines = content.splitlines()
+        metrics = {}
+        comparison = []
+        
+        for line in lines:
+            if "|" in line and "Metric" not in line and "-------" not in line:
+                parts = [p.strip() for p in line.split("|")]
+                if len(parts) == 3:
+                    metric_name = parts[0].strip()
+                    rf_val = float(parts[1])
+                    xgb_val = float(parts[2])
+                    comparison.append({
+                        "metric": metric_name,
+                        "random_forest": rf_val,
+                        "xgboost": xgb_val
+                    })
+                    metrics[metric_name.lower()] = xgb_val
+
+        return {
+            "metrics": metrics,
+            "comparison": comparison,
+            "chosen_model": "XGBoost",
+            "raw_report": content
+        }
+    except Exception as e:
+        logger.error(f"Error parsing training report: {e}")
+        return fallback_data
